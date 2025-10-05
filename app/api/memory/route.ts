@@ -1,5 +1,5 @@
-import { kvGet, kvSet, kvDel } from '../../../lib/kv';
-import { requireApiKey } from '../../..//lib/auth';
+import { kvGet, kvSet, kvDel } from '../../../../lib/kv';
+import { requireApiKey } from '../../../..//lib/auth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
