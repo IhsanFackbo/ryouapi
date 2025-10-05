@@ -215,10 +215,13 @@ button:disabled {
     width: 100%;
     padding: 12px;
 }
-
 .result-container {
     position: relative;
     min-height: 150px;
+    width: 100%; /* Fixed ke card width */
+    max-width: 100%; /* No exceed parent */
+    overflow: hidden; /* Clip horizontal jika ada */
+    border-radius: 12px; /* Smooth box */
 }
 
 .result {
@@ -226,18 +229,24 @@ button:disabled {
     padding: 15px;
     border-radius: 12px;
     font-size: 0.9em;
-    overflow-x: auto; /* Scroll horizontal hanya jika code panjang */
-    white-space: pre-wrap;
-    word-wrap: break-word; /* Fix: Wrap kata panjang */
-    overflow-wrap: break-word; /* Cross-browser wrap */
-    hyphens: auto; /* Hyphenate jika perlu */
+    font-family: 'Courier New', monospace; /* Monospace untuk JSON/code */
+    line-height: 1.5; /* Readable wrapping */
     max-height: 300px;
-    overflow-y: auto;
+    overflow-y: auto; /* Scroll vertikal jika panjang */
+    overflow-x: hidden; /* No horizontal scroll – force wrap */
+    width: 100%; /* Full kotak width */
+    max-width: 100%; /* Batasi ke container */
+    box-sizing: border-box;
     border-left: 4px solid transparent;
     transition: all 0.3s;
-    max-width: 100%; /* Batasi lebar kotak */
-    box-sizing: border-box;
-    line-height: 1.4; /* Lebih readable untuk error text */
+    /* Fix Wrapping: Long text langsung ke bawah dalam kotak */
+    white-space: pre-wrap; /* Preserve newlines, allow wrap */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-all; /* Break long words/URLs immediate */
+    overflow-wrap: anywhere; /* Break di mana saja (modern) */
+    hyphens: auto; /* Hyphenate jika perlu */
+    text-align: left; /* Align left untuk readability */
 }
 
 body.light-mode .result {
@@ -253,13 +262,27 @@ body.light-mode .result {
 .result.error {
     border-left-color: #ff6b6b;
     background: rgba(255, 107, 107, 0.1);
-    padding: 18px; /* Extra padding untuk error */
+    padding: 18px; /* Extra space untuk long error */
 }
 
-/* Tambah untuk long messages */
-.result.error .long-message {
-    font-style: italic;
-    color: #ff9a9a;
+/* Responsive: Di mobile, kotak lebih sempit – wrap lebih cepat */
+@media (max-width: 768px) {
+    .result {
+        font-size: 0.85em;
+        padding: 12px;
+        width: 100vw; /* Full mobile width, tapi wrap internal */
+        margin: 0 -10px; /* Adjust jika perlu */
+    }
+    .card {
+        max-width: 100%;
+        padding: 15px;
+    }
+}
+
+/* Untuk raw-error (jika ada HTML) */
+.result.raw-error {
+    font-family: sans-serif; /* Less monospace untuk text panjang */
+    word-break: normal; /* Normal wrap untuk prose */
 }
 
 .spinner {
@@ -323,3 +346,4 @@ footer a:hover {
         width: 100%;
     }
 }
+
