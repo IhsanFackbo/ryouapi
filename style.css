@@ -1,237 +1,20 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
-    color: #e0e0e0;
-    line-height: 1.6;
-    padding: 20px;
-    min-height: 100vh;
-    transition: background 0.4s ease, color 0.4s ease;
-}
-
-body.light-mode {
-    background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 50%, #e2e8f0 100%);
-    color: #333;
-}
-
-header {
-    text-align: center;
-    margin-bottom: 40px;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 25px;
-    border-radius: 20px;
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    transition: all 0.4s ease;
-}
-
-body.light-mode header {
-    background: rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.header-content h1 {
-    font-size: 2.8em;
-    margin-bottom: 10px;
-    background: linear-gradient(45deg, #4ecdc4, #44a08d, #6ab04c);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.header-content p {
-    opacity: 0.9;
-    font-size: 1.1em;
-}
-
-#theme-toggle {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    padding: 10px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 1.2em;
-    transition: all 0.3s;
-}
-
-#theme-toggle:hover {
-    transform: scale(1.1);
-    background: rgba(255, 255, 255, 0.3);
-}
-
-.grid-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 30px;
-    max-width: 1200px;
-    margin: 0 auto;
-    justify-items: center; /* Center cards horizontally */
-}
-
-.card {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 20px;
-    padding: 25px;
-    width: 100%;
-    max-width: 350px;
-    transition: all 0.4s ease;
-    backdrop-filter: blur(15px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-}
-
-body.light-mode .card {
-    background: rgba(255, 255, 255, 0.9);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    color: #333;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-}
-
-.card:hover {
-    transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
-    border-color: rgba(78, 205, 196, 0.5);
-}
-
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
-.card h2 {
-    font-size: 1.6em;
-    color: #4ecdc4;
-    margin: 0;
-}
-
-body.light-mode .card h2 {
-    color: #2c3e50;
-}
-
-.copy-btn {
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    padding: 8px 12px;
-    border-radius: 10px;
-    color: #e0e0e0;
-    cursor: pointer;
-    font-size: 0.9em;
-    transition: all 0.3s;
-}
-
-.copy-btn:hover {
-    background: #4ecdc4;
-    color: white;
-    transform: scale(1.05);
-}
-
-body.light-mode .copy-btn {
-    background: rgba(0, 0, 0, 0.1);
-    color: #333;
-}
-
-.card p {
-    margin-bottom: 15px;
-    opacity: 0.85;
-    text-align: left;
-}
-
-.curl-example {
-    background: rgba(0, 0, 0, 0.3);
-    padding: 10px;
-    border-radius: 10px;
-    margin-bottom: 15px;
-    font-size: 0.85em;
-    overflow-x: auto;
-    border-left: 3px solid #4ecdc4;
-}
-
-body.light-mode .curl-example {
-    background: rgba(0, 0, 0, 0.05);
-    border-left: 3px solid #2c3e50;
-}
-
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 15px;
-}
-
-input, button {
-    padding: 12px;
-    border: none;
-    border-radius: 12px;
-    font-size: 1em;
-    transition: all 0.3s;
-}
-
-input {
-    background: rgba(255, 255, 255, 0.15);
-    color: #e0e0e0;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-body.light-mode input {
-    background: rgba(255, 255, 255, 0.8);
-    color: #333;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-input::placeholder {
-    color: #a0a0a0;
-}
-
-button {
-    background: linear-gradient(45deg, #4ecdc4, #44a08d);
-    color: white;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-button:hover:not(:disabled) {
-    transform: scale(1.02);
-    box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4);
-}
-
-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-}
-
-#all-btn {
-    align-self: center;
-    width: 100%;
-    padding: 12px;
-}
-
-.result-container {
-    position: relative;
-    min-height: 150px;
-}
-
 .result {
     background: rgba(0, 0, 0, 0.4);
     padding: 15px;
     border-radius: 12px;
     font-size: 0.9em;
-    overflow-x: auto;
+    overflow-x: auto; /* Scroll horizontal hanya jika code panjang */
     white-space: pre-wrap;
+    word-wrap: break-word; /* Fix: Wrap kata panjang */
+    overflow-wrap: break-word; /* Cross-browser wrap */
+    hyphens: auto; /* Hyphenate jika perlu */
     max-height: 300px;
     overflow-y: auto;
     border-left: 4px solid transparent;
     transition: all 0.3s;
+    max-width: 100%; /* Batasi lebar kotak */
+    box-sizing: border-box;
+    line-height: 1.4; /* Lebih readable untuk error text */
 }
 
 body.light-mode .result {
@@ -247,71 +30,11 @@ body.light-mode .result {
 .result.error {
     border-left-color: #ff6b6b;
     background: rgba(255, 107, 107, 0.1);
+    padding: 18px; /* Extra padding untuk error */
 }
 
-.result key { /* Simple highlight untuk JSON keys */
-    color: #4ecdc4;
-    font-weight: bold;
-}
-
-.spinner {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 40px;
-    height: 40px;
-    border: 4px solid rgba(255, 255, 255, 0.3);
-    border-top: 4px solid #4ecdc4;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-.spinner.hidden {
-    display: none;
-}
-
-@keyframes spin {
-    0% { transform: translate(-50%, -50%) rotate(0deg); }
-    100% { transform: translate(-50%, -50%) rotate(360deg); }
-}
-
-footer {
-    text-align: center;
-    margin-top: 50px;
-    padding: 20px;
-    opacity: 0.7;
-    font-size: 0.9em;
-}
-
-footer a {
-    color: #4ecdc4;
-    text-decoration: none;
-}
-
-footer a:hover {
-    text-decoration: underline;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .grid-container {
-        grid-template-columns: 1fr;
-        gap: 20px;
-        padding: 0 10px;
-    }
-    .header-content h1 {
-        font-size: 2.2em;
-    }
-    .card {
-        max-width: none;
-        padding: 20px;
-    }
-    .card-header {
-        flex-direction: column;
-        gap: 10px;
-    }
-    .copy-btn {
-        width: 100%;
-    }
+/* Tambah untuk long messages */
+.result.error .long-message {
+    font-style: italic;
+    color: #ff9a9a;
 }
