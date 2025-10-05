@@ -9,7 +9,7 @@ function extractVideoId(url) {
     return match ? match[1] : null;
 }
 
-// YouTube API (Official – No Error)
+// YouTube API (Official)
 async function getYouTubeInfo(videoId, apiKey) {
     if (!apiKey) throw new Error('YOUTUBE_API_KEY required. Set in env vars.');
 
@@ -33,7 +33,7 @@ async function getYouTubeInfo(videoId, apiKey) {
         const contentDetails = item.contentDetails || {};
         const statistics = item.statistics || {};
         
-        // Parse duration ISO to seconds (robust)
+        // Parse duration ISO to seconds
         let durationSeconds = 0;
         const durationMatch = contentDetails.duration ? contentDetails.duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/) : null;
         if (durationMatch) {
@@ -54,8 +54,7 @@ async function getYouTubeInfo(videoId, apiKey) {
             likeCount: parseInt(statistics.likeCount) || 0
         };
     } catch (error) {
-        console.error('YouTube API Detailed Error:', error.response?.data || error.message);
-        
+        console.error('YouTube API Error:', error.response?.data || error.message);
         if (error.response?.status === 403) {
             throw new Error('API forbidden: Invalid key or quota exceeded. Check Google Console.');
         } else if (error.response?.status === 404) {
@@ -65,7 +64,6 @@ async function getYouTubeInfo(videoId, apiKey) {
         } else if (error.code === 'ECONNABORTED') {
             throw new Error('API timeout – network issue.');
         }
-        
         throw new Error(`API error: ${error.response?.data?.error?.message || error.message}`);
     }
 }
@@ -113,7 +111,7 @@ async function getYouTubeUrls(url, useFallback = false) {
 }
 
 export default async function handler(req, res) {
-    res.setHeader('Content-Type', 'application/json'); // Force JSON
+    res.setHeader('Content-Type', 'application/json'); // Force JSON selalu
     
     const apiKey = process.env.YOUTUBE_API_KEY;
     const useFallbackUrls = process.env.USE_YT_URLS === 'true';
@@ -178,7 +176,7 @@ export default async function handler(req, res) {
             });
 
         } else {
-            // Non-YouTube
+            // Non-YouTube (sama seperti sebelumnya – block converter, fetch HTML, parse)
             const isConverter = url.includes('ytmp3') || url.includes('y2mate') || url.includes('ytmp4');
             if (isConverter) {
                 return res.status(422).json({
@@ -246,26 +244,45 @@ export default async function handler(req, res) {
         let status = 500;
         let message = 'Processing error occurred.';
         
+        // Spesifik error handling (enhanced)
         if (error.message.includes('timeout') || error.code === 'ECONNABORTED') {
-            status = 408; message = 'Timeout – site/API slow.';
+            status = 408;
+            message = 'Timeout – site/API slow or unresponsive.';
         } else if (error.message.includes('invalid') || error.code === 'ENOTFOUND') {
-            status = 400; message = 'Invalid URL.';
+            status = 400;
+            message = 'Invalid or unreachable URL.';
         } else if (error.message.includes('403') || error.message.includes('forbidden')) {
-            status = 403; message = 'Access blocked.';
+            status = 403;
+            message = 'Access blocked (anti-bot or permission denied).';
         } else if (error.message.includes('quota') || error.message.includes('API key')) {
-            status = 403; message = 'YouTube API issue – check key/quota.';
-        } else if (error.message.includes('not found') || error.message.includes('private')) {
-            status = 404; message = 'Content unavailable.';
-        } else if (error.message.includes('fallback') || error.message.includes('yt-dlp')) {
-            status = 503; message = 'Tool unavailable.';
+            status = 403;
+            message = 'YouTube API issue – invalid key or quota exceeded.';
+        } else if (error.message.includes('not found') || error.message.includes('private') || error.message.includes('deleted')) {
+            status = 404;
+            message = 'Content not found or unavailable (private/deleted video).';
+        } else if (error.message.includes('fallback') || error.message.includes('yt-dlp') || error.message.includes('binary')) {
+            status = 503;
+            message = 'Download tool unavailable (try again or use API only).';
+        } else if (error.response?.status) {
+            // Axios/HTTP error
+            status = error.response.status;
+            message = `HTTP ${status}: ${error.response.statusText || 'Server error'}.`;
         }
 
-        return res.status(status).json({
+        // Force JSON response (selalu)
+        const errorResponse = {
             error: true,
             message,
             code: status,
-            suggestion: 'Try public YouTube URL. Set API key for best results.',
-            details: process.env.NODE_ENV === 'development' ? error.message : undefined
-        });
+            suggestion: 'Try a public YouTube URL. Set YOUTUBE_API_KEY for best results (free from Google Console).',
+            details: process.env.NODE_ENV === 'development' ? error.message + '\nStack: ' + (error.stack || 'No stack') : undefined
+        };
+        
+        res.status(status).json(errorResponse);
+        
+        // Safety: End response manual jika headers belum sent (hindari hanging)
+        if (!res.headersSent) {
+            res.end();
+        }
     }
 }
