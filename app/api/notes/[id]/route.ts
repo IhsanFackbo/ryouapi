@@ -1,5 +1,5 @@
-import { ensureSchema, getDb } from '../../../lib/db';
-import { requireApiKey } from '../../../lib/auth';
+import { ensureSchema, getDb } from '../../../../lib/db';
+import { requireApiKey } from '../../../../lib/auth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
