@@ -1,0 +1,20 @@
+{
+  "name": "downloader-api-next",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "14.2.7",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "drizzle-orm": "^0.31.4",
+    "@neondatabase/serverless": "^0.10.3",
+    "@upstash/redis": "^1.31.6"
+  }
+}
