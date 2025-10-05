@@ -1,4 +1,4 @@
-import { assertPublicHTTP } from '../../../lib/ssrf';
+import { assertPublicHTTP } from '../../../../lib/ssrf';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
