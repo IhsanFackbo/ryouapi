@@ -4,7 +4,8 @@
   "type": "module",
   "dependencies": {
     "ytdl-core": "^4.11.5",
-    "cheerio": "^1.0.0-rc.12"
+    "cheerio": "^1.0.0-rc.12",
+    "youtube-dl-exec": "^2.4.3"
   },
   "engines": {
     "node": ">=18"
@@ -13,4 +14,5 @@
     "dev": "vercel dev"
   }
 }
+
 
