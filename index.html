@@ -3,46 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API Endpoints Dashboard</title>
+    <meta name="description" content="Modern API Endpoints Dashboard for Downloaders, AI, and More – Test & Copy Easily">
+    <title>🚀 API Endpoints Hub – Modern Dashboard</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="dark-mode"> <!-- Default dark; JS toggle light -->
     <header>
-        <h1>🛠️ API Endpoints Dashboard</h1>
-        <p>Tema Keren: Test dan Execute Endpoints dengan Mudah</p>
+        <div class="header-content">
+            <h1>🚀 API Endpoints Hub</h1>
+            <p>Dashboard Keren untuk Test & Execute API – Download, AI, dan Lebih Banyak Lagi</p>
+            <button id="theme-toggle" aria-label="Toggle dark/light mode">🌙</button>
+        </div>
     </header>
 
     <main class="grid-container">
         <!-- Card Downloader -->
-        <div class="card" data-category="downloader">
-            <h2>📥 Downloader</h2>
-            <p>Download info dari web (misal YouTube). Input URL, dapatkan JSON: title, audio URL, video URL.</p>
+        <div class="card">
+            <div class="card-header">
+                <h2>📥 Downloader API</h2>
+                <button class="copy-btn" onclick="copyEndpoint('downloader')">📋 Copy Endpoint URL</button>
+            </div>
+            <p>Extract title, audio/video URLs dari YouTube atau web umum (HTML to JSON).</p>
+            <div class="curl-example">
+                <code>curl "https://your-project.vercel.app/api/downloader?url=YOUTUBE_URL"</code>
+            </div>
             <form id="downloader-form">
-                <input type="url" id="url-input" placeholder="Masukkan URL YouTube (contoh: https://youtube.com/watch?v=...)" required>
-                <button type="submit">Execute Endpoint</button>
+                <input type="url" id="url-input" placeholder="https://youtube.com/watch?v=..." required>
+                <button type="submit">Execute ➡️</button>
             </form>
-            <pre id="downloader-result"></pre>
+            <div class="result-container">
+                <pre id="downloader-result" class="result"></pre>
+                <div id="downloader-spinner" class="spinner hidden"></div>
+            </div>
         </div>
 
         <!-- Card AI -->
-        <div class="card" data-category="ai">
-            <h2>🤖 AI</h2>
-            <p>Endpoint AI sederhana (contoh generate text). Input prompt, dapatkan JSON response.</p>
+        <div class="card">
+            <div class="card-header">
+                <h2>🤖 AI API</h2>
+                <button class="copy-btn" onclick="copyEndpoint('ai')">📋 Copy Endpoint URL</button>
+            </div>
+            <p>Generate text response dari prompt (contoh sederhana; extend ke OpenAI).</p>
+            <div class="curl-example">
+                <code>curl -X POST "https://your-project.vercel.app/api/ai" -H "Content-Type: application/json" -d '{"prompt":"Hello"}'</code>
+            </div>
             <form id="ai-form">
-                <input type="text" id="prompt-input" placeholder="Masukkan prompt AI (contoh: Hello world)" required>
-                <button type="submit">Execute Endpoint</button>
+                <input type="text" id="prompt-input" placeholder="Enter AI prompt..." required>
+                <button type="submit">Execute ➡️</button>
             </form>
-            <pre id="ai-result"></pre>
+            <div class="result-container">
+                <pre id="ai-result" class="result"></pre>
+                <div id="ai-spinner" class="spinner hidden"></div>
+            </div>
         </div>
 
         <!-- Card All -->
-        <div class="card" data-category="all">
-            <h2>🌐 All</h2>
-            <p>Lihat semua endpoints dengan status. No input needed.</p>
-            <button id="all-btn">Execute All Endpoints</button>
-            <pre id="all-result"></pre>
+        <div class="card">
+            <div class="card-header">
+                <h2>🌐 All APIs</h2>
+                <button class="copy-btn" onclick="copyEndpoint('all')">📋 Copy Endpoint URL</button>
+            </div>
+            <p>List semua endpoints dengan docs & status – No input needed.</p>
+            <div class="curl-example">
+                <code>curl "https://your-project.vercel.app/api/all"</code>
+            </div>
+            <button id="all-btn">Execute All ➡️</button>
+            <div class="result-container">
+                <pre id="all-result" class="result"></pre>
+                <div id="all-spinner" class="spinner hidden"></div>
+            </div>
+        </div>
+
+        <!-- Tambah Card Instagram (dari sebelumnya, jika sudah ada) -->
+        <div class="card">
+            <div class="card-header">
+                <h2>📸 Instagram API</h2>
+                <button class="copy-btn" onclick="copyEndpoint('instagram')">📋 Copy Endpoint URL</button>
+            </div>
+            <p>Extract caption, video/image dari Instagram post public.</p>
+            <div class="curl-example">
+                <code>curl "https://your-project.vercel.app/api/instagram?url=INSTAGRAM_URL"</code>
+            </div>
+            <form id="instagram-form">
+                <input type="url" id="ig-url-input" placeholder="https://instagram.com/p/..." required>
+                <button type="submit">Execute ➡️</button>
+            </form>
+            <div class="result-container">
+                <pre id="instagram-result" class="result"></pre>
+                <div id="instagram-spinner" class="spinner hidden"></div>
+            </div>
         </div>
     </main>
+
+    <footer>
+        <p>Built with ❤️ for Developers & Bots | <a href="/api/all">Full Docs</a> | Use responsibly – Public content only.</p>
+    </footer>
 
     <script src="script.js"></script>
 </body>
