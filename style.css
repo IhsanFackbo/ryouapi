@@ -315,3 +315,6 @@ footer a:hover {
         width: 100%;
     }
 }
+   #toast {
+        opacity: 0;
+    }
