@@ -1,5 +1,5 @@
-import { requireApiKey } from '../../../lib/auth';
-import { env } from '../../../lib/env';
+import { requireApiKey } from '../../../../lib/auth';
+import { env } from '../../../../lib/env';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
