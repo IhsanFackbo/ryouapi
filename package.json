@@ -1,4 +1,4 @@
-// {
+ {
   "name": "my-api-website",
   "version": "1.0.0",
   "type": "module",
@@ -13,3 +13,4 @@
     "dev": "vercel dev"
   }
 }
+
