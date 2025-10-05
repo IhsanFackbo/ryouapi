@@ -22,47 +22,59 @@ export default async function handler(req, res) {
         });
     }
 
-    // Config umum untuk requests (untuk non-YouTube)
+    // Config axios dengan headers anti-block (lebih advanced)
     const requestConfig = {
-        timeout: 5000, // 5s timeout
+        timeout: 8000, // Naikkan ke 8s untuk situs lambat seperti ytmp3
         headers: {
-            'User -Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
+            'User -Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Referer': url.includes('youtube') ? 'https://www.youtube.com/' : 'https://www.google.com/', // Referer untuk bypass
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Cache-Control': 'max-age=0'
+        },
+        maxRedirects: 5 // Handle redirects
     };
 
     try {
-        // Cek jika URL adalah YouTube (atau YouTube-like: youtube.com, youtu.be, m.youtube.com)
+        // Cek jika URL adalah YouTube
         const isYouTube = url.includes('youtube.com') || url.includes('youtu.be') || url.includes('youtube-nocookie.com');
         if (isYouTube) {
-            // Gunakan youtube-dl-exec untuk extract info (cepat dan stabil)
+            // ... (kode youtube-dl-exec sama seperti sebelumnya – tidak berubah)
             let info;
             try {
                 info = await youtubedl(url, {
-                    dumpSingleJson: true, // Output JSON saja, no download
-                    noWarnings: true,    // Hilangkan warnings
-                    extractFlat: false,  // Full extract untuk URLs
-                    noPlaylists: true,   // Hindari playlist jika single video
-                    timeout: 5000        // 5s timeout
+                    dumpSingleJson: true,
+                    noWarnings: true,
+                    extractFlat: false,
+                    noPlaylists: true,
+                    timeout: 8000
                 });
             } catch (ytError) {
-                // Fallback jika yt-dlp gagal (misal cold start atau network)
-                console.warn('yt-dlp failed, falling back to basic fetch:', ytError.message);
-                throw new Error(`YouTube extraction failed: ${ytError.message}. Try again.`);
+                console.warn('yt-dlp failed:', ytError.message);
+                return res.status(422).json({
+                    error: true,
+                    message: `YouTube extraction failed: ${ytError.message}. Video mungkin private atau URL invalid.`,
+                    code: 422,
+                    suggestion: 'Coba URL YouTube public lain.'
+                });
             }
 
             const title = info.title || 'No title';
             const author = info.uploader || 'Unknown';
             const duration = info.duration || 0;
-
-            // Extract audio/video URLs (yt-dlp kasih direct URLs)
-            const audioUrl = info.url || null; // Biasanya audio/video combined, atau filter jika ada formats
+            const audioUrl = info.url || null;
             let videoUrl = null;
             if (info.formats && info.formats.length > 0) {
-                // Cari format video-only jika ada
                 const videoFormat = info.formats.find(f => f.vcodec !== 'none' && f.acodec === 'none');
                 videoUrl = videoFormat ? videoFormat.url : info.url;
             } else {
-                videoUrl = audioUrl; // Fallback ke main URL
+                videoUrl = audioUrl;
             }
 
             return res.status(200).json({
@@ -74,29 +86,44 @@ export default async function handler(req, res) {
                 audioUrl,
                 videoUrl,
                 formatsCount: info.formats ? info.formats.length : 'Basic info only',
-                note: 'URLs expire in ~6-24 hours. Download responsibly. Use tools like yt-dlp for full download.'
+                note: 'URLs expire in ~6-24 hours. Download responsibly.'
             });
 
         } else {
-            // Fallback: Non-YouTube – Fetch HTML dan convert ke JSON
+            // Non-YouTube: Cek spesifik ytmp3 atau similar
+            const isYtmp3 = url.includes('ytmp3') || url.includes('ytmp4') || url.includes('y2mate');
+            if (isYtmp3) {
+                return res.status(422).json({
+                    error: true,
+                    message: 'ytmp3/y2mate sites blocked by anti-bot protection. Cannot scrape directly.',
+                    code: 422,
+                    suggestion: 'Gunakan URL YouTube asli untuk extract info. ytmp3 untuk download manual saja.',
+                    disclaimer: 'Use official tools; third-party converters may violate ToS.'
+                });
+            }
+
+            // Fetch dengan retry (1x untuk timeout)
             let response;
-            try {
-                response = await axios.get(url, requestConfig);
-            } catch (fetchError) {
-                if (fetchError.code === 'ECONNABORTED' || fetchError.code === 'ETIMEDOUT') {
-                    throw new Error('Request timeout – site slow or blocked.');
+            let retryCount = 0;
+            const maxRetries = 1;
+            while (retryCount <= maxRetries) {
+                try {
+                    response = await axios.get(url, requestConfig);
+                    break; // Sukses, keluar loop
+                } catch (fetchError) {
+                    retryCount++;
+                    if (retryCount > maxRetries || fetchError.code !== 'ECONNABORTED') {
+                        throw fetchError; // Gagal final
+                    }
+                    console.warn(`Retry ${retryCount} for ${url}`);
+                    await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s
                 }
-                if (fetchError.response?.status >= 400) {
-                    throw new Error(`HTTP ${fetchError.response.status}: ${fetchError.response.statusText}`);
-                }
-                throw fetchError;
             }
 
             const { data: html, headers } = response;
             const contentType = headers['content-type'] || '';
 
             if (contentType.includes('application/json')) {
-                // Jika response sudah JSON, return langsung (parse jika string)
                 let jsonData;
                 try {
                     jsonData = typeof html === 'string' ? JSON.parse(html) : html;
@@ -116,21 +143,18 @@ export default async function handler(req, res) {
             const title = $('title').text().trim() || $('h1').first().text().trim() || 'No title found';
             const links = [];
             
-            // Extract links yang relevan (audio/video/download)
             $('a, source, link').each((i, el) => {
                 const href = $(el).attr('href') || $(el).attr('src');
                 const text = $(el).text().trim().toLowerCase();
                 if (href && (href.includes('.mp3') || href.includes('.mp4') || href.includes('.m4a') || href.includes('audio') || href.includes('video') || text.includes('download'))) {
-                    // Resolve relative URLs
                     const fullHref = href.startsWith('http') ? href : new URL(href, url).href;
                     if (!links.includes(fullHref)) {
                         links.push(fullHref);
                     }
                 }
-                if (links.length >= 10) return false; // Limit untuk performa
+                if (links.length >= 10) return false;
             });
 
-            // Extract meta description jika ada
             const description = $('meta[name="description"]').attr('content') || '';
 
             return res.status(200).json({
@@ -140,35 +164,38 @@ export default async function handler(req, res) {
                 description: description.substring(0, 200) + (description.length > 200 ? '...' : ''),
                 extractedLinks: links.length > 0 ? links : ['No audio/video links found'],
                 totalLinks: links.length,
-                note: 'HTML parsed. For direct downloads, check links manually. Use specialized tools for protected content.'
+                note: 'HTML parsed. For direct downloads, check links manually.'
             });
         }
 
     } catch (error) {
         console.error('Downloader error:', error);
 
-        // Error spesifik
         let status = 500;
         let message = error.message || 'Failed to process URL';
 
-        if (error.message.includes('timeout') || error.message.includes('ECONNABORTED')) {
+        // Error spesifik (enhanced)
+        if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
             status = 408;
-            message = 'Request timeout – URL processing too slow or site unresponsive.';
-        } else if (error.message.includes('ENOTFOUND') || error.message.includes('invalid url')) {
+            message = 'Request timeout – site slow or unresponsive (common for protected sites like ytmp3).';
+        } else if (error.code === 'ENOTFOUND' || error.message.includes('invalid url')) {
             status = 400;
             message = 'Invalid or unreachable URL.';
-        } else if (error.message.includes('403') || error.message.includes('forbidden')) {
+        } else if (error.response?.status === 403 || error.message.includes('403') || error.message.includes('forbidden')) {
             status = 403;
-            message = 'Access forbidden – video/post private or region-blocked.';
-        } else if (error.message.includes('429')) {
+            message = 'Access forbidden – site blocks automated requests (e.g., Cloudflare protection on ytmp3).';
+        } else if (error.response?.status === 429 || error.message.includes('429')) {
             status = 429;
-            message = 'Rate limited – too many requests. Try again later.';
+            message = 'Rate limited – too many requests. Wait and retry.';
         } else if (error.message.includes('private') || error.message.includes('unavailable') || error.message.includes('deleted')) {
             status = 404;
             message = 'Content not available (private/deleted).';
         } else if (error.message.includes('extraction failed') || error.message.includes('yt-dlp')) {
             status = 422;
-            message = 'Extraction failed – try a different URL or check if content is supported.';
+            message = 'Extraction failed – content not supported or blocked.';
+        } else if (error.response?.status >= 500) {
+            status = 502;
+            message = 'Site server error – try again later.';
         }
 
         return res.status(status).json({
@@ -176,7 +203,7 @@ export default async function handler(req, res) {
             message,
             code: status,
             details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
-            suggestion: 'Check URL validity, ensure public access, or try a different one.'
+            suggestion: 'Gunakan URL YouTube public untuk hasil terbaik. Hindari converter sites seperti ytmp3 untuk scraping.'
         });
     }
 }
